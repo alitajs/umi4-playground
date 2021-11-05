@@ -4,6 +4,9 @@
   "description": "umi@4 playground",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "bin": {
+    "xiaohu": "bin/xiaohu.js"
+  },
   "files": [
     "dist"
   ],
@@ -24,5 +27,8 @@
   "homepage": "https://github.com/alitajs/xiaohu/tree/master/packages/xiaohuhu#readme",
   "publishConfig": {
     "access": "public"
+  },
+  "dependencies": {
+    "umi": "link:/Users/xiaohuoni/umi-next/packages/umi"
   }
 }
