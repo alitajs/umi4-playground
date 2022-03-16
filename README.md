@@ -2,7 +2,7 @@
 
 umi@4 playground
 
-[![GitHub Actions status](https://github.com/alitajs/xiaohu/workflows/Node%20CI/badge.svg)](https://github.com/alitajs/xiaohu)
+[![GitHub Actions status](https://github.com/alitajs/umi4-playground/workflows/Node%20CI/badge.svg)](https://github.com/alitajs/umi4-playground)
 
 A React framework based on umi.
 
@@ -12,10 +12,6 @@ A React framework based on umi.
 
 1. Create your own project by clicking the [button (Use this template)](https://github.com/alitajs/umi4-playground/generate)
 2. Init your project like this: [Init alita@3 diff](https://github.com/alitajs/alita-next/pull/1/files)
-
-## Link to umi-next
-
-change `packages/xiaohuhu/package.json#L32` link to your local umi-next path
 
 ## start
 

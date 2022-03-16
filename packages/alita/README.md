@@ -1,5 +1,3 @@
-# xiaohuhu
-
-umia@4 playground
+# alita
 
 See our website [alitajs](https://alitajs.com) for more information.

@@ -1,9 +1,10 @@
-import type { Config } from '@jest/types';
+import { Config, createConfig } from 'umi/test';
 
 export default {
+  ...createConfig(),
   testMatch: ['**/packages/*/src/**/*.test.ts'],
-  transform: {
-    '^.+\\.(ts)$': 'ts-jest',
-  },
-  testTimeout: 30000,
+  modulePathIgnorePatterns: [
+    '<rootDir>/packages/.+/compiled',
+    '<rootDir>/packages/.+/fixtures',
+  ],
 } as Config.InitialOptions;

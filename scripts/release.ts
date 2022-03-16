@@ -1,4 +1,5 @@
-import * as logger from '@umijs/utils/src/logger';
+import { logger } from '@umijs/utils';
+import { existsSync } from 'fs';
 import getGitRepoInfo from 'git-repo-info';
 import { join } from 'path';
 import rimraf from 'rimraf';
@@ -39,7 +40,7 @@ import { assert, eachPkg, getPkgs } from './utils';
   logger.event('check npm ownership');
   const whoami = (await $`npm whoami`).stdout.trim();
   await Promise.all(
-    ['umi', 'bigfish', '@umijs/core'].map(async (pkg) => {
+    ['alita'].map(async (pkg) => {
       const owners = (await $`npm owner ls ${pkg}`).stdout
         .trim()
         .split('\n')
@@ -52,14 +53,15 @@ import { assert, eachPkg, getPkgs } from './utils';
 
   // clean
   logger.event('clean');
-  eachPkg(pkgs, ({ pkgPath, pkg }) => {
-    logger.info(`clean dist of ${pkg}`);
-    rimraf.sync(join(pkgPath, 'dist'));
+  eachPkg(pkgs, ({ dir, name }) => {
+    logger.info(`clean dist of ${name}`);
+    rimraf.sync(join(dir, 'dist'));
   });
 
   // build packages
   logger.event('build packages');
   await $`npm run build:release`;
+  await $`npm run build:extra`;
 
   // generate changelog
   // TODO
@@ -70,9 +72,38 @@ import { assert, eachPkg, getPkgs } from './utils';
   await $`lerna version --exact --no-commit-hooks --no-git-tag-version --no-push --loglevel error`;
   const version = require('../lerna.json').version;
 
+  // update example versions
+  logger.event('update example versions');
+  const examplesDir = join(__dirname, '../examples');
+  const examples = fs.readdirSync(examplesDir).filter((dir) => {
+    return (
+      !dir.startsWith('.') && existsSync(join(examplesDir, dir, 'package.json'))
+    );
+  });
+  examples.forEach((example) => {
+    const pkg = require(join(
+      __dirname,
+      '../examples',
+      example,
+      'package.json',
+    ));
+    pkg.scripts['start'] = 'npm run dev';
+    pkg.dependencies ||= {};
+    if (pkg.dependencies['alita']) pkg.dependencies['alita'] = version;
+    if (pkg.dependencies['@alita/plugins'])
+      pkg.dependencies['@alita/plugins'] = version;
+    delete pkg.version;
+    fs.writeFileSync(
+      join(__dirname, '../examples', example, 'package.json'),
+      JSON.stringify(pkg, null, 2),
+    );
+  });
+
   // update pnpm lockfile
   logger.event('update pnpm lockfile');
+  $.verbose = false;
   await $`pnpm i`;
+  $.verbose = true;
 
   // commit
   logger.event('commit');
@@ -88,20 +119,29 @@ import { assert, eachPkg, getPkgs } from './utils';
 
   // npm publish
   logger.event('pnpm publish');
-  const innerPkgs = pkgs.filter((pkg) => !['umi', 'bigfish'].includes(pkg));
-  const tag =
+  $.verbose = false;
+  const innerPkgs = pkgs.filter(
+    // do not publish father
+    (pkg) => !['alita'].includes(pkg),
+  );
+  let tag = 'latest';
+  if (
     version.includes('-alpha.') ||
     version.includes('-beta.') ||
     version.includes('-rc.')
-      ? 'next'
-      : 'latest';
+  ) {
+    tag = 'next';
+  }
+  if (version.includes('-canary.')) tag = 'canary';
   await Promise.all(
     innerPkgs.map(async (pkg) => {
       await $`cd packages/${pkg} && npm publish --tag ${tag}`;
+      logger.info(`+ ${pkg}`);
     }),
   );
-  await $`cd packages/umi && npm publish --tag ${tag}`;
-  await $`cd packages/bigfish && npm publish --tag ${tag}`;
+  await $`cd packages/alita && npm publish --tag ${tag}`;
+  logger.info(`+ alita`);
+  $.verbose = true;
 
   // sync tnpm
   logger.event('sync tnpm');

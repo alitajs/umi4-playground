@@ -1,4 +1,5 @@
 import 'zx/globals';
+import { setExcludeFolder } from './utils';
 
 (async () => {
   const root = path.join(__dirname, '..');
@@ -16,34 +17,15 @@ import 'zx/globals';
   }
 
   function getName(pkgName: string) {
-    if (['umi'].includes(pkgName)) {
+    if (['alita'].includes(pkgName)) {
       return pkgName;
     } else {
-      return `@umijs/${pkgName}`;
+      return `@dumijs/${pkgName}`;
     }
   }
 
   function getVersion() {
-    return require('../package.json').version;
-  }
-
-  function setExcludeFolder(opts: any) {
-    if (!fs.existsSync(path.join(root, '.idea'))) return;
-    const configPath = path.join(root, '.idea', 'umi-next.iml');
-    let content = fs.readFileSync(configPath, 'utf-8');
-    const folders = ['dist', 'compiled'];
-    for (const folder of folders) {
-      console.log('test', folder);
-      const excludeContent = `<excludeFolder url='file://$MODULE_DIR$/packages/${opts.pkg}/${folder}' />`;
-      const replaceMatcher = `<content url="file://$MODULE_DIR$">`;
-      if (!content.includes(excludeContent)) {
-        content = content.replace(
-          replaceMatcher,
-          `${replaceMatcher}\n      ${excludeContent}`,
-        );
-      }
-    }
-    fs.writeFileSync(configPath, content, 'utf-8');
+    return require('../lerna.json').version;
   }
 
   async function bootstrapPkg(opts: any) {
@@ -74,14 +56,14 @@ import 'zx/globals';
             },
             repository: {
               type: 'git',
-              url: 'https://github.com/umijs/umi-next',
+              url: 'https://github.com/alitajs/alita-next',
             },
             authors: [
-              'chencheng <sorrycc@gmail.com> (https://github.com/sorrycc)',
+              'xiaohuoni <xiaohuoni@gmail.com> (https://github.com/xiaohuoni)',
             ],
             license: 'MIT',
-            bugs: 'https://github.com/umijs/umi-next/issues',
-            homepage: `https://github.com/umijs/umi-next/tree/master/packages/${opts.pkg}#readme`,
+            bugs: 'https://github.com/alitajs/alita-next/issues',
+            homepage: `https://github.com/alitajs/alita-next/tree/master/packages/${opts.pkg}#readme`,
             publishConfig: {
               access: 'public',
             },
@@ -107,7 +89,7 @@ import 'zx/globals';
       // README.md
       await fs.writeFile(
         path.join(pkgDir, 'README.md'),
-        `# ${name}\n\nSee our website [umijs](https://umijs.org) for more information.`,
+        `# ${name}\n\nSee our website [alita](https://d.umijs.org) for more information.`,
         'utf-8',
       );
 
@@ -152,7 +134,7 @@ test('normal', () => {
       }
 
       // set excludeFolder for webstorm
-      setExcludeFolder({ pkg: opts.pkg });
+      setExcludeFolder({ pkg: opts.pkg, cwd: root });
 
       console.log(chalk.green(`${opts.pkg} bootstrapped`));
     }
